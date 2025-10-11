@@ -1,8 +1,8 @@
 import xml.etree.ElementTree as ET
 
-itempool = r'E:\SteamLibrary\steamapps\common\The Binding of Isaac Rebirth\extracted_resources\resources\itempools.xml'
-items_metadata = r'E:\SteamLibrary\steamapps\common\The Binding of Isaac Rebirth\extracted_resources\resources\items_metadata.xml'
-items = r'E:\SteamLibrary\steamapps\common\The Binding of Isaac Rebirth\extracted_resources\resources\items.xml'
+itempool = r'D:\SteamLibrary\steamapps\common\The Binding of Isaac Rebirth\extracted_resources\resources\itempools.xml'
+items_metadata = r'D:\SteamLibrary\steamapps\common\The Binding of Isaac Rebirth\extracted_resources\resources\items_metadata.xml'
+items = r'D:\SteamLibrary\steamapps\common\The Binding of Isaac Rebirth\extracted_resources\resources\items.xml'
 with open(itempool,'rb') as f:
     itempool = f.read().decode('utf8')
 
