@@ -136,7 +136,7 @@
         <span>
           <div class="btn-group" style="margin:6px 6px">
             <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_has_c691=!safe_has_c691))" :class="safe_has_c691? 'btn-success' : 'btn-default'" id="crafting_item_c691" class="btn btn-xs">道具：十字圣球</div>
-            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_has_t88=!safe_has_t88))" :class="safe_has_t88? 'btn-success' : 'btn-default'" id="crafting_item_t88" class="btn btn-xs">饰品：不！</div>
+            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_has_t88=!safe_has_t88))" :class="safe_has_t88? 'btn-success' : 'btn-default'" id="crafting_item_t88" class="btn btn-xs">（金/多个）饰品：不！</div>
           </div>
         </span>
       </div>
