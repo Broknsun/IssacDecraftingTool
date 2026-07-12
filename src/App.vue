@@ -1,30 +1,92 @@
 <template>
-  <h1>合成宝袋挖掘器</h1>
-  <hr />
-  <div>
-    <div>
-      <div style="margin: 1px; text-align: center">
-        <div
-          style="
-            width: 100%;
-            background: var(--brand-primary);
-            padding: 10px;
-            font-size: 16px;
-            color: #fff;
-            border-radius: 4px 4px 0 0;
-          "
-        >
-          种子
-        </div>
+  <div class="decrafting-app" style="padding: 10px 120px; background: #1e1e2e; min-height: 100vh; color: #e0e0e0;">
+    <h1 style="text-align:center; margin: 0 0 8px 0; font-size: 22px;">合成宝袋挖掘器</h1>
+
+    <!-- 种子 + 控制区 -->
+    <div style="display: flex; gap: 14px; margin-bottom: 2px; align-items: flex-start;">
+      <div style="flex-shrink: 0; width: 240px;">
+        <div style="
+          background: var(--brand-primary);
+          padding: 6px 12px; font-size: 13px; font-weight: bold; color: #fff;
+          border-radius: 6px 6px 0 0; text-align: center;
+        ">种子</div>
         <input
           class="form-control"
           v-model="seed"
-          style="border-radius: 0 0 4px 4px"
+          placeholder="例如: JKD9 Z0C9"
+          style="border-radius: 0 0 6px 6px; padding: 8px 12px; font-size: 16px; text-align: center; letter-spacing: 2px;"
         />
       </div>
+      <div style="flex: 1; min-width: 0;">
+      <div style="margin-bottom: 2px">
+        <span>
+            <div class="btn-group" style="margin:3px 4px">
+              <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(display_mode='craftable'))" :class="display_mode=='craftable'? 'btn-success' : 'btn-secondary'" class="btn btn-sm">可合成({{ craftable_count }})</div>
+              <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(display_mode='crafted'))" :class="display_mode=='crafted'? 'btn-success' : 'btn-secondary'" class="btn btn-sm">已合成({{ crafted_count }})</div>
+            </div>
+        </span>
+        <span>
+            <div class="btn-group" style="margin:3px 4px">
+              <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'|| (craft_count=1))" :class="craft_count==1? 'btn-success' : 'btn-secondary'" class="btn btn-sm">1配方</div>
+              <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'|| (craft_count=10))" :class="craft_count==10? 'btn-success' : 'btn-secondary'" class="btn btn-sm">10配方</div>
+              <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'|| (craft_count=20))" :class="craft_count==20? 'btn-success' : 'btn-secondary'" class="btn btn-sm">20配方</div>
+              <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'|| (craft_count=50))" :class="craft_count==50? 'btn-success' : 'btn-secondary'" class="btn btn-sm">50配方</div>
+              <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'|| (craft_count=100))" :class="craft_count==100? 'btn-success' : 'btn-secondary'" class="btn btn-sm">100配方</div>
+            </div>
+        </span>
+
+        <span>
+            <div class="btn-group" style="margin:3px 4px">
+              <div type="button" @click="(worker_status=='busy'|| (real_time_flush='true'))" :class="real_time_flush=='true'? 'btn-success' : 'btn-secondary'" class="btn btn-sm" v-bind:disabled="worker_status=='busy'||undefined">启用实时刷新</div>
+              <div type="button" @click="(worker_status=='busy'|| (real_time_flush='false'))" :class="real_time_flush!='true'? 'btn-success' : 'btn-secondary'" class="btn btn-sm" v-bind:disabled="worker_status=='busy'||undefined">关闭实时刷新</div>
+            </div>
+        </span>
+        <span>
+            <div class="btn-group" style="margin:3px 4px">
+              <div type="button" @click="(worker_status=='busy'|| no_wasm) || (enable_wasm='true')" :class="enable_wasm=='true'? 'btn-success' : 'btn-secondary'" class="btn btn-sm" v-bind:disabled="(worker_status=='busy'|| no_wasm) || undefined">启用wasm加速</div>
+              <div type="button" @click="(worker_status=='busy'|| no_wasm) || (enable_wasm='false')" :class="enable_wasm!='true'? 'btn-success' : 'btn-secondary'" class="btn btn-sm" v-bind:disabled="(worker_status=='busy'|| no_wasm) || undefined">禁用wasm加速</div>
+            </div>
+        </span>
+      </div>
+      <div style="margin-bottom: 4px">
+
+        <span>
+          <div class="btn-group" style="margin:3px 4px">
+            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_is_greed=!safe_is_greed))" :class="safe_is_greed? 'btn-success' : 'btn-secondary'" id="crafting_item_greed" class="btn btn-sm">贪婪模式</div>
+            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_is_daily_run=!safe_is_daily_run))" :class="safe_is_daily_run? 'btn-success' : 'btn-secondary'" id="crafting_item_daily_run" class="btn btn-sm">每日挑战</div>
+            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_current_stage=safe_current_stage>=7?1:7))" :class="safe_current_stage >= 7? 'btn-success' : 'btn-secondary'" id="crafting_item_stage_more_7" class="btn btn-sm">(含)第四章后</div>
+          </div>
+        </span>
+        <span>
+          <div class="btn-group" style="margin:3px 4px">
+            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_has_tlost=!safe_has_tlost))" :class="safe_has_tlost? 'btn-success' : 'btn-secondary'" id="crafting_item_tlost" class="btn btn-sm">堕化游魂</div>
+            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_has_keeper=!safe_has_keeper))" :class="safe_has_keeper? 'btn-success' : 'btn-secondary'" id="crafting_item_keeper" class="btn btn-sm">（堕化）店主</div>
+            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_has_lost=!safe_has_lost))" :class="safe_has_lost? 'btn-success' : 'btn-secondary'" id="crafting_item_lost" class="btn btn-sm">游魂长子名分</div>
+          </div>
+
+        </span>
+        <span>
+          <div class="btn-group" style="margin:3px 4px">
+            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_has_c691=!safe_has_c691))" :class="safe_has_c691? 'btn-success' : 'btn-secondary'" id="crafting_item_c691" class="btn btn-sm">道具：十字圣球</div>
+            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_has_t88=!safe_has_t88))" :class="safe_has_t88? 'btn-success' : 'btn-secondary'" id="crafting_item_t88" class="btn btn-sm">（金/多个）饰品：不！</div>
+          </div>
+        </span>
+      </div>
+      </div></div>
 
       <!-- 配方列表 -->
-      <div style="background: var(--detail-infobox-bg); margin: 10px 1px">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:6px;">
+        <div style="font-size:14px;color:var(--detail-wikitable-color);">配方分值: <b style="color:var(--brand-warning);font-size:14px;">{{ scoreRange.min }} ~ {{ scoreRange.max }}</b>  ({{ scoreRange.minTier }} ~ {{ scoreRange.maxTier }})</div>
+        <table style="font-size:13px;color:#ccc;border-collapse:collapse;line-height:1.4;border:1px solid #555;">
+        <tr style="color:var(--brand-warning);">
+          <td style="padding:1px 6px;border:1px solid #555;">总分</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">≤8</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">9~14</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">15~18</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">19~22</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">23~26</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">27~34</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">≥35</td>
+        </tr><tr>
+          <td style="padding:1px 6px;border:1px solid #555;">品质</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">0~1</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">0~2</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">1~2</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">2~3</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">2~4</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">3~4</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">4</td>
+        </tr>
+      </table>
+      </div>
+      <div style="margin-bottom: 3px; font-size: 14px; color: var(--detail-wikitable-color);">合成材料（点图标切换数量 / 可拖拽排序）</div>
+      <div style="background: var(--detail-infobox-bg); margin: 0 0 8px 0; padding: 6px; border-radius: 6px;">
         <transition-group name="flip-list">
           <template v-for="(item, index) in items" v-bind:key="item.id">
             <div
@@ -58,22 +120,23 @@
                   width: fit-content;
                   text-align: center;
                   margin: 2px;
-                  padding: 8px 4px;
+                  padding: 12px 8px;
                   background: var(--sub-a);
-                  border-radius: 4px;
+                  border-radius: 6px;
                 "
               >
                 <div
                   :class="'decrafting_recipe decrafting_recipe_' + item.id"
-                  @click="(item.count = item.count > 0 ? 0 : 8), resort()"
+                  @click="(item.count = item.count > 0 ? 0 : 8)"
                   style="cursor: pointer"
                   :title="recipe_name[item.id]"
                 ></div>
+                <div style="font-size:13px;color:var(--brand-warning);">分值:{{ materialScore[item.id] }}</div>
                 <div>
                   <select
-                    class="form-control input-sm"
+                    class="form-control"
                     v-model="item.count"
-                    @change="resort()"
+                    
                   >
                     <template v-for="i in 9" :key="i - 1">
                       <option>{{ i - 1 }}</option>
@@ -85,73 +148,18 @@
           </template>
         </transition-group>
       </div>
-      <div style="margin-bottom: 4px">
-        <span>
-            <div class="btn-group" style="margin:6px 6px">
-              <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(display_mode='craftable'))" :class="display_mode=='craftable'? 'btn-success' : 'btn-default'" class="btn btn-xs">可合成({{ craftable_count }})</div>
-              <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(display_mode='crafted'))" :class="display_mode=='crafted'? 'btn-success' : 'btn-default'" class="btn btn-xs">已合成({{ crafted_count }})</div>
-            </div>
-        </span>
-        <span>
-            <div class="btn-group" style="margin:6px 6px">
-              <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'|| (craft_count=1))" :class="craft_count==1? 'btn-success' : 'btn-default'" class="btn btn-xs">1配方</div>
-              <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'|| (craft_count=10))" :class="craft_count==10? 'btn-success' : 'btn-default'" class="btn btn-xs">10配方</div>
-              <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'|| (craft_count=20))" :class="craft_count==20? 'btn-success' : 'btn-default'" class="btn btn-xs">20配方</div>
-              <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'|| (craft_count=50))" :class="craft_count==50? 'btn-success' : 'btn-default'" class="btn btn-xs">50配方</div>
-              <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'|| (craft_count=100))" :class="craft_count==100? 'btn-success' : 'btn-default'" class="btn btn-xs">100配方</div>
-            </div>
-        </span>
 
-
-        <span>
-            <div class="btn-group" style="margin:6px 6px">
-              <div type="button" @click="(worker_status=='busy'|| (real_time_flush='true'))" :class="real_time_flush=='true'? 'btn-success' : 'btn-default'" class="btn btn-xs" v-bind:disabled="worker_status=='busy'||undefined">启用实时刷新</div>
-              <div type="button" @click="(worker_status=='busy'|| (real_time_flush='false'))" :class="real_time_flush!='true'? 'btn-success' : 'btn-default'" class="btn btn-xs" v-bind:disabled="worker_status=='busy'||undefined">关闭实时刷新</div>
-            </div>
-        </span>
-        <span>
-            <div class="btn-group" style="margin:6px 6px">
-              <div type="button" @click="(worker_status=='busy'|| no_wasm) || (enable_wasm='true')" :class="enable_wasm=='true'? 'btn-success' : 'btn-default'" class="btn btn-xs" v-bind:disabled="(worker_status=='busy'|| no_wasm) || undefined">启用wasm加速</div>
-              <div type="button" @click="(worker_status=='busy'|| no_wasm) || (enable_wasm='false')" :class="enable_wasm!='true'? 'btn-success' : 'btn-default'" class="btn btn-xs" v-bind:disabled="(worker_status=='busy'|| no_wasm) || undefined">禁用wasm加速</div>
-            </div>
-        </span>
-      </div>
-      <div style="margin-bottom: 4px">
-
-        <span>
-          <div class="btn-group" style="margin:6px 6px">
-            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_is_greed=!safe_is_greed))" :class="safe_is_greed? 'btn-success' : 'btn-default'" id="crafting_item_greed" class="btn btn-xs">贪婪模式</div>
-            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_is_daily_run=!safe_is_daily_run))" :class="safe_is_daily_run? 'btn-success' : 'btn-default'" id="crafting_item_daily_run" class="btn btn-xs">每日挑战</div>
-            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_current_stage=safe_current_stage>=7?1:7))" :class="safe_current_stage >= 7? 'btn-success' : 'btn-default'" id="crafting_item_stage_more_7" class="btn btn-xs">(含)第四章后</div>
-          </div>
-        </span>
-        <span>
-          <div class="btn-group" style="margin:6px 6px">
-            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_has_tlost=!safe_has_tlost))" :class="safe_has_tlost? 'btn-success' : 'btn-default'" id="crafting_item_tlost" class="btn btn-xs">堕化游魂</div>
-            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_has_keeper=!safe_has_keeper))" :class="safe_has_keeper? 'btn-success' : 'btn-default'" id="crafting_item_keeper" class="btn btn-xs">（堕化）店主</div>
-            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_has_lost=!safe_has_lost))" :class="safe_has_lost? 'btn-success' : 'btn-default'" id="crafting_item_lost" class="btn btn-xs">游魂长子名分</div>
-          </div>
-
-        </span>
-        <span>
-          <div class="btn-group" style="margin:6px 6px">
-            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_has_c691=!safe_has_c691))" :class="safe_has_c691? 'btn-success' : 'btn-default'" id="crafting_item_c691" class="btn btn-xs">道具：十字圣球</div>
-            <div type="button" v-bind:disabled="worker_status=='busy'||undefined" @click="(worker_status=='busy'||(safe_has_t88=!safe_has_t88))" :class="safe_has_t88? 'btn-success' : 'btn-default'" id="crafting_item_t88" class="btn btn-xs">（金/多个）饰品：不！</div>
-          </div>
-        </span>
-      </div>
-
-      <div class="row" style="margin-bottom: 4px">
-        <div class="col-xs-8">
+      <div class="row" style="margin-bottom: 12px">
+        <div class="col-8">
           <button
-            class="col-xs-8 btn btn-success"
+            class="col-8 btn btn-success btn-lg"
             @click="calculate"
             v-if="worker_status == 'idle'"
           >
             开始合成
           </button>
           <button
-            class="col-xs-8 btn btn-success"
+            class="col-8 btn btn-success"
             v-if="worker_status == 'busy'"
             disabled
           >
@@ -161,21 +169,52 @@
             ></div>
 
           </button>
-          <button class="col-xs-4 btn btn-link" @click="clear_items">
+          <button class="col-4 btn btn-link" @click="clear_items">
             清空组件
           </button>
         </div>
       </div>
+      
+      <!-- 固定配方 -->
+      <div style="margin-bottom:3px;font-size:14px;color:var(--detail-wikitable-color);">固定配方（与种子无关）</div>
+      <div style="background:var(--detail-infobox-bg);margin:0 0 8px 0;padding:4px;border-radius:6px;min-height:30px;">
+        <template v-for="fp in fixedRecipes" v-bind:key="'fp'+fp.id">
+          <div style="display:inline-block;width:fit-content;margin:2px;text-align:center;background:var(--detail-bg);border:solid;border-radius:4px;border-width:1px;border-color:var(--brand-primary);">
+            <a class="icons collectibles"
+              :id="'collectibles_'+('000'.substr((''+fp.id).length)+fp.id)"
+              :href="'https://isaac.huijiwiki.com/wiki/C'+fp.id"
+              target="_blank"
+              style="transform:scale(1.5);image-rendering:pixelated;margin:8px 0;display:inline-block;"
+            ></a>
+            <div>
+              <template v-for="(mid, mi) in fp.recipe" v-bind:key="mi">
+                <div class="decrafting_recipe decrafting_recipe_result" :class="'decrafting_recipe_'+mid" :title="recipe_name[mid]"></div>
+                <br v-if="mi==3" />
+              </template>
+            </div>
+            <div style="margin:0;border-radius:0 0 4px 4px;background:var(--brand-primary);">
+              <span style="color:white;">{{ fp.id }}</span>
+            </div>
+          </div>
+        </template>
+      </div>
       <!-- 结果列表 -->
-      <div
+      <div style="margin-bottom: 3px; font-size: 14px; color: var(--detail-wikitable-color);">合成结果</div>
+      <template v-for="(group, gidx) in qualityGroups" v-bind:key="'g'+gidx">
+        <div style="margin-bottom: 2px; margin-top: 6px; font-size: 12px; color: var(--brand-warning);">
+          ▸ {{ group.label }}（{{ group.items.length }}个）
+        </div>
+        <div
         style="
           background: var(--detail-infobox-bg);
-          margin: 0 1px;
-          padding: 1px;
+          margin: 0 0 8px 0;
+          padding: 4px;
+          border-radius: 6px;
+          min-height: 30px;
         "
       >
         <transition-group name="flip-item-list">
-          <template v-for="result in results" v-bind:key="result.id">
+          <template v-for="result in group.items" v-bind:key="result.id">
             <!-- 渲染第一个配方 -->
             <div
               v-bind:key="'recipes_'+result.id+'_'+0"
@@ -210,7 +249,8 @@
                   '000'.substr(('' + result.id).length) +
                   result.id
                 "
-                :href="'/wiki/C' + result.id"
+                :href="'https://isaac.huijiwiki.com/wiki/C' + result.id"
+                target="_blank"
                 style="
                   transform: scale(1.5);
                   image-rendering: pixelated;
@@ -246,7 +286,7 @@
               </div>
               <a
                 style="color: var(--detail-wikitable-color)"
-                class="btn btn-link btn-xs"
+                class="btn btn-link btn-sm"
                 @click="result.fold = false"
                 >{{ result.items.length }}个配方</a
               >
@@ -299,7 +339,8 @@
                       '000'.substr(('' + result.id).length) +
                       result.id
                     "
-                    :href="'/wiki/C' + result.id"
+                    :href="'https://isaac.huijiwiki.com/wiki/C' + result.id"
+                target="_blank"
                     style="
                       transform: scale(1.5);
                       image-rendering: pixelated;
@@ -323,7 +364,7 @@
                   </div>
                   <a
                     style="color: var(--detail-wikitable-color)"
-                    class="btn btn-link btn-xs"
+                    class="btn btn-link btn-sm"
                     @click="result.fold = true"
                     >隐藏此配方</a
                   >
@@ -345,9 +386,9 @@
           </template>
         </transition-group>
       </div>
+      </template>
       <div class="row post-reading dash-line">
       </div>
-    </div>
   </div>
 </template>
 <script>
@@ -1034,8 +1075,8 @@ export default {
   data() {
     let items = [];
     let predefined = {
-      1: { count: 8, order: 1 },
-      2: { count: 8, order: 2 },
+      1: { count: 8 },
+      8: { count: 8 },
       // 3:{count:8,order:3},
       // 4:{count:1,order:40},
       // 5:{count:1,order:41},
@@ -1069,30 +1110,18 @@ export default {
         craftable: undefined,
         crafted: false,
         fold: true,
-        items: [0, 0, 0, 0, 0, 0, 0, 0],
+        items: [0, 0, 0, 0, 0, 0, 0, 0]
       };
     }
 
-    /* resort */
+    /* resort - sort by score ascending, 粪便(id:29) last */
     {
-      let changed = false;
-      do {
-        changed = false;
-        for (let i = 0; i < items.length - 1; i++) {
-          if (
-            (items[i].count == 0 && items[i + 1].count > 0) ||
-            (items[i].count != 0 &&
-              items[i + 1].count != 0 &&
-              predefined[items[i].id].order >=
-                predefined[items[i + 1].id].order)
-          ) {
-            let temp = items[i];
-            items[i] = items[i + 1];
-            items[i + 1] = temp;
-            changed = true;
-          }
-        }
-      } while (changed);
+      const sc={0:0,1:1,2:4,3:5,4:5,5:5,6:5,7:1,8:1,9:3,10:5,11:8,12:2,13:7,14:5,15:2,16:7,17:10,18:2,19:4,20:8,21:2,22:2,23:4,24:4,25:2,26:7,27:7,28:7,29:0,30:1};const score=(id)=>(id===29?999:(sc[id]||0));
+      items.sort((a, b) => {
+        if (a.count === 0 && b.count > 0) return 1;
+        if (a.count > 0 && b.count === 0) return -1;
+        return score(a.id) - score(b.id);
+      });
     }
 
     return {
@@ -1142,6 +1171,34 @@ export default {
         29:"屎块",
         30:"其它",
       },
+      fixedRecipes: [
+          { recipe:[29,29,29,29,29,29,29,29], id:36 },
+          { recipe:[1,1,1,1,1,1,1,1], id:45 },
+          { recipe:[22,22,22,22,22,22,22,22], id:75 },
+          { recipe:[21,21,21,21,21,21,21,21], id:85 },
+          { recipe:[15,15,15,15,15,15,15,15], id:106 },
+          { recipe:[3,3,3,3,3,3,3,3], id:118 },
+          { recipe:[13,13,12,12,12,12,12,12], id:175 },
+          { recipe:[8,8,8,8,8,8,8,8], id:177 },
+          { recipe:[4,4,4,4,4,4,4,4], id:182 },
+          { recipe:[5,2,1,4,4,4,4,4], id:331 },
+          { recipe:[12,12,12,12,12,12,12,12], id:343 },
+          { recipe:[16,16,15,15,15,15,15,15], id:483 },
+          { recipe:[17,17,17,17,17,17,17,17], id:483 },
+          { recipe:[24,24,24,24,24,24,24,24], id:489 },
+          { recipe:[25,25,25,25,25,25,25,25], id:580 },
+          { recipe:[6,6,6,6,6,6,6,6], id:628 },
+          { recipe:[7,7,1,1,1,1,1,1], id:639 },
+          { recipe:[3,22,22,22,22,22,22,22], id:654 },
+          { recipe:[2,2,2,2,2,2,2,2], id:686 },
+        ],
+        materialScore: {
+        0:0, 1:1, 2:4, 3:5, 4:5, 5:5, 6:5, 7:1,
+        8:1, 9:3, 10:5, 11:8, 12:2, 13:7, 14:5,
+        15:2, 16:7, 17:10, 18:2, 19:4, 20:8,
+        21:2, 22:2, 23:4, 24:4, 25:2, 26:7, 27:7, 28:7,
+        29:0, 30:1,
+      },
       no_wasm: !(fetch && WebAssembly != null),
       enable_wasm: fetch && WebAssembly != null ? "true" : "false",
       safe_is_daily_run: false,
@@ -1153,7 +1210,49 @@ export default {
       safe_has_tlost: false,
       safe_has_c691: false,
       safe_has_t88: false,
+      itemQuality: [0,3,3,3,4,3,2,3,1,0,2,2,4,2,2,2,2,2,3,0,2,1,1,1,1,1,1,1,1,1,1,1,3,1,2,0,0,1,1,0,0,0,1,0,0,1,2,1,2,2,3,3,4,1,1,1,0,1,3,0,1,0,2,2,2,0,0,1,3,3,3,2,2,1,0,2,2,1,3,3,3,3,3,2,2,2,0,1,1,2,3,2,2,1,1,1,2,1,3,1,2,3,1,1,3,4,2,2,4,3,3,0,1,1,4,2,2,0,4,2,2,2,2,1,1,1,0,3,1,1,2,1,3,3,2,2,0,0,2,2,1,0,2,2,1,2,3,1,0,4,3,3,2,3,2,2,2,2,3,3,1,0,1,1,2,3,2,1,4,4,3,1,2,3,1,2,1,0,3,3,0,3,4,3,3,3,0,1,0,3,3,2,1,2,1,0,3,2,0,3,1,2,1,3,1,2,0,1,3,1,1,0,1,2,1,3,3,2,2,2,2,3,1,4,3,2,2,1,2,2,3,2,4,0,3,0,0,3,0,0,1,2,2,2,3,4,1,2,2,3,1,2,0,2,2,2,1,2,0,3,3,3,0,2,1,3,2,1,3,1,2,2,0,0,0,2,0,1,3,1,1,1,1,1,1,1,2,0,1,1,0,1,3,1,0,0,1,2,1,1,2,3,1,2,1,3,3,3,2,2,3,3,2,4,1,0,0,3,1,2,1,1,2,1,1,0,1,2,2,1,2,4,1,3,3,3,2,1,1,1,1,3,3,1,1,3,1,3,1,1,3,1,1,2,2,2,3,1,0,3,4,2,2,2,1,2,1,1,1,2,3,0,2,3,3,3,2,1,2,2,2,3,1,1,1,1,1,2,0,3,3,1,1,2,0,4,0,3,1,3,1,3,3,1,1,1,1,3,3,2,2,3,1,1,3,4,2,3,2,3,0,0,3,2,3,1,0,1,2,2,1,2,2,1,2,1,1,1,3,2,2,4,1,3,3,2,1,0,1,1,2,2,0,3,2,1,1,2,2,3,1,3,3,2,2,2,2,1,0,1,0,2,1,1,0,0,2,3,0,2,0,0,0,3,1,2,0,2,1,4,2,2,2,1,3,3,3,3,1,3,2,1,1,3,0,2,3,2,1,1,1,1,1,2,3,3,1,1,2,1,2,2,1,1,3,0,2,3,3,1,1,4,3,3,3,2,1,1,2,0,2,1,1,1,1,2,2,3,1,3,4,4,4,3,1,0,2,2,1,2,1,1,4,1,2,1,2,3,1,1,2,2,3,3,1,2,1,3,0,3,3,4,0,1,3,1,3,0,2,3,2,2,3,0,2,2,3,3,3,2,3,3,2,0,1,0,2,1,2,3,0,2,1,0,2,3,3,2,2,3,0,2,2,1,1,4,0,0,4,3,0,0,1,3,1,1,4,2,1,1,3,1,2,4,1,1,2,2,0,1,0,3,1,1,2,0,0,1,1,1,3,2,0,2,4,2,0,1,0,3,2,1,0,2,1,1,1,1,4,2,2,0,3,2,2,1,1,2,2,4,3,4,1,2,3,2,3,1,4,2,3,2,1,1,1,1,3,1,3,1,3,4,3,3,0,0,3,2,0,1,2,0,2,4,2,0,1,1,3,1,3,2,3],
     };
+  },
+  computed: {
+    scoreRange() {
+      const scores = [];
+      for (const item of this.items) {
+        if (item.count > 0) {
+          const sc = this.materialScore[item.id] || 0;
+          for (let i = 0; i < item.count; i++) scores.push(sc);
+        }
+      }
+      if (scores.length === 0) return { min: 0, max: 0, minTier: '档位1→Q0~1', maxTier: '档位1→Q0~1' };
+      scores.sort((a, b) => a - b);
+      const pick = Math.min(8, scores.length);
+      const min8 = scores.slice(0, pick).reduce((a, b) => a + b, 0);
+      const max8 = scores.slice(-pick).reduce((a, b) => a + b, 0);
+      const tier = (s) => {
+        if (s >= 35) return '档位7→Q4';
+        if (s >= 27) return '档位6→Q3~4';
+        if (s >= 23) return '档位5→Q2~4';
+        if (s >= 19) return '档位4→Q2~3';
+        if (s >= 15) return '档位3→Q1~2';
+        if (s >= 9)  return '档位2→Q0~2';
+        return '档位1→Q0~1';
+      };
+      return { min: min8, max: max8, minTier: tier(min8), maxTier: tier(max8) };
+    },
+    qualityGroups() {
+      const groups = { 4:[], 3:[], 2:[], 1:[], 0:[] };
+      const labels = { 4:'品质4', 3:'品质3', 2:'品质2', 1:'品质1', 0:'品质0' };
+      for (let i = 1; i < this.results.length; i++) {
+        const r = this.results[i];
+        if (!r.valid) continue;
+        if (this.display_mode === 'craftable' && !r.craftable) continue;
+        if (this.display_mode === 'crafted' && !r.crafted) continue;
+        const q = (this.itemQuality[i] !== undefined) ? this.itemQuality[i] : 0;
+        groups[q].push(r);
+      }
+      return Object.entries(groups)
+        .filter(([, items]) => items.length > 0)
+        .map(([q, items]) => ({ quality: parseInt(q), label: labels[q], items }));
+    },
   },
   methods: {
     move_down(index) {
@@ -1213,10 +1312,11 @@ export default {
       do {
         changed = false;
         for (let i = 0; i < this.items.length - 1; i++) {
-          if (this.items[i].count == 0 && this.items[i + 1].count > 0) {
-            let temp = this.items[i];
-            this.items[i] = this.items[i + 1];
-            this.items[i + 1] = temp;
+          const a = this.items[i], b = this.items[i + 1];
+          if ((a.count === 0 && b.count > 0) ||
+              (a.count > 0 && b.count > 0 && ((a.id===29?999:(this.materialScore[a.id]||0)) > (b.id===29?999:(this.materialScore[b.id]||0))))) {
+            this.items[i] = b;
+            this.items[i + 1] = a;
             changed = true;
           }
         }
@@ -1321,6 +1421,12 @@ webWorker.onmessage = function (event) {
 };
 </script>
 <style scoped>
+.btn {
+  border: 1px solid #555 !important;
+}
+.btn-success {
+  border-color: #3d8b3d !important;
+}
 .flip-list-move {
   transition: transform 0.2s ease;
 }
@@ -1331,7 +1437,7 @@ webWorker.onmessage = function (event) {
 
 .decrafting_recipe {
   image-rendering: pixelated;
-  transform: scale(2);
+  transform: scale(2.3);
   width: 16px;
   height: 16px;
   display: inline-block;
@@ -1339,7 +1445,7 @@ webWorker.onmessage = function (event) {
   background-image: url("https://huiji-public.huijistatic.com/isaac/uploads/8/89/Crafting_ui_sprite.png");
 }
 .decrafting_recipe_result {
-  transform: scale(1.5) !important;
+  transform: scale(1.6) !important;
   width: 16px;
   height: 16px;
   display: inline-block;

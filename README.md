@@ -1,58 +1,67 @@
-# decrafting
+# Isaac Decrafting Tool · 以撒合成宝袋挖掘器
 
-这是灰机wiki上[Decrafting](https://isaac.huijiwiki.com/wiki/Decrafting)的源代码。
+基于 [frto027/IsaacDecraftingHuijiGadget](https://github.com/frto027/IsaacDecraftingHuijiGadget) 二次开发的独立部署版本。
 
-使用`vue3`开发，`node v16.13.1`，`vue cli`。
+> 原项目是为灰机 wiki 设计的 Vue 3 Gadget 内嵌工具。  
+> 本项目将其改造为可独立部署的 Web 应用，并增加了大量 UI/UX 改进。
 
-## 安装依赖
-```
+## 功能
+
+- 🔢 **种子计算**：输入以撒种子码（如 `JKD9 Z0C9`），穷举所有 8 格合成配方
+- 🧩 **材料管理**：30 种基础材料（红心 / 魂心 / 硬币 / 钥匙 / 炸弹…），拖拽排序，下拉计数
+- 📊 **品质档位**：实时显示配方总分范围及对应的道具品质档位
+- 🏷️ **品质分组**：合成结果按道具品质（0~4）自动分组显示
+- 📋 **固定配方表**：19 条与种子无关的固定配方，卡片式展示
+- ⚡ **WASM 加速**：可选开启 WebAssembly 加速（~100x 性能提升），不支持时自动降级
+- 🎮 **游戏选项**：贪婪模式 / 每日挑战 / 第四章后 / 各角色过滤器
+
+## 快速开始
+
+```bash
+# 安装依赖
 npm install
-```
 
-## 编译、热重载调试
-```
+# 开发模式（热重载）
 npm run serve
-```
 
-已经将灰机wiki中的部分css放到`index.html`，可以用于调试。
-
-## 编译、用于生产环境
-```
+# 生产构建
 npm run build
 ```
 
-添加了`transform.js`，会先将生成的app.js和chunk-vendors.js合并，然后做`Babel`转换，再做`es3ify-mw`，得到mediawiki支持的js，输出到`dist/js/output.js`，直接将此文件上传到wiki的`Gadget:Decrafting.app.js`即可。
+开发服务器启动后访问 `http://localhost:8080/`。
 
-## Lints and fixes files
-```
-npm run lint
-```
-# 道具品质信息来源
+> **Windows 用户**：双击 `start.bat` 一键启动。
 
-道具品质信息生成自[这个工程](https://github.com/frto027/IsaacBagOfCraftingHuijiGadget)，`src/App.vue`里面的compressed变量，就是那个写在字符串里面的WebWorker。
+## 技术栈
 
-wasm的品质信息是单独生成的，编译在二进制代码里面。
+| 层 | 技术 |
+|----|------|
+| 前端框架 | Vue 3 (Options API) |
+| UI 框架 | Bootstrap 5.1 |
+| 构建工具 | Vue CLI 4.5 |
+| 高性能计算 | C++ → WebAssembly (Emscripten) |
+| 并行计算 | Web Worker（内联） |
+| 游戏数据 | 以撒 XML 解包 → Python 脚本生成 |
 
-# wasm的编译
+## 改动说明
 
-修改以下路径：
-- `boswasm/build_em++.bat`中的`D:\emsdk\emsdk_env.bat`，需要自行下载emsdk
-- `boswasm/gen_item_data.py`中的三个xml文件位置（提前解包好游戏）
+相对于原项目的主要改进：
 
-```
-cd bofwasm
-python gen_item_data.py
-./build_em++.bat
-```
+- **独立部署**：不再依赖灰机 wiki 的 CSS 和 JS 环境
+- **Bootstrap 5 适配**：修复了所有已废弃的类名（btn-xs, btn-default, col-xs-* 等）
+- **深色模式**：添加完整深色主题背景，所有元素可见
+- **品质分组**：结果按道具品质（0~4）分组，材料标明分值
+- **固定配方表**：19 条固定配方卡片化展示，按 ID 排序
+- **UI 优化**：自适应宽度、合理页边距、材料按分值排序、分值档位对照表
+- **Wiki 链接**：道具图标点击跳转至灰机 wiki 对应页面
 
-编译后会生成data.txt文件，把这个文件内容拷贝到`src/App.vue`的`webWorkerText`变量里面对应位置上。
+## 数据来源
 
-# 有些做法太粗暴了
+- **道具品质**：来自 [灰机 wiki 品质页面](https://isaac.huijiwiki.com/wiki/品质)
+- **道具池 & 标签**：来自游戏 `items.xml` / `items_metadata.xml` / `itempools.xml` 解包
+- **道具图标精灵图**：由灰机 wiki CDN 提供
 
-嗯。
+## 致谢
 
-问题不大。
-
-折腾出来的东西，暂时感觉没必要花时间做优雅，写编译脚本可以更优雅，但确实有些复杂，就为了替自己复制粘贴一下，读的人还要花更多时间，没必要。
-## Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+- [frto027](https://github.com/frto027) — 原作者，创造了合成宝袋挖掘器的核心算法和 wiki 版本
+- [灰机 wiki 以撒社区](https://isaac.huijiwiki.com/) — 道具数据与精灵图资源
