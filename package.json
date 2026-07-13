@@ -1,11 +1,16 @@
 {
-  "name": "decrafting",
-  "version": "0.1.0",
+  "name": "isaac-decrafting-tool",
+  "version": "1.0.0",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "serve": "SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
     "build": "SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build && node transform.js",
-    "lint": "SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service lint"
+    "build:web": "SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build",
+    "lint": "SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service lint",
+    "electron:dev": "npm run build:web && electron .",
+    "electron:build": "npm run build:web && electron-builder --win portable",
+    "electron:build:installer": "npm run build:web && electron-builder --win"
   },
   "dependencies": {
     "@babel/core": "^7.16.5",
@@ -20,11 +25,14 @@
     "vue": "^3.0.0"
   },
   "devDependencies": {
+    "@electron/packager": "^20.0.2",
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-eslint": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
     "@vue/compiler-sfc": "^3.0.0",
     "babel-eslint": "^10.1.0",
+    "electron": "^43.1.0",
+    "electron-builder": "^26.15.3",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^7.0.0"
   },
@@ -44,5 +52,21 @@
   },
   "browserslist": [
     "IE 8"
-  ]
+  ],
+  "build": {
+    "appId": "com.broknsun.isaac-decrafting-tool",
+    "productName": "Isaac Decrafting Tool",
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "portable",
+      "icon": "public/favicon.ico"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ]
+  }
 }
