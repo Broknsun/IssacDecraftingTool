@@ -76,7 +76,7 @@
 
       <!-- 配方列表 -->
       <div style="display:flex;align-items:center;gap:16px;margin-bottom:6px;">
-        <div style="font-size:14px;color:var(--detail-wikitable-color);">配方分值: <b style="color:var(--brand-warning);font-size:14px;">{{ scoreRange.min }} ~ {{ scoreRange.max }}</b>  ({{ scoreRange.minTier }} ~ {{ scoreRange.maxTier }})</div>
+        <div style="font-size:14px;color:var(--detail-wikitable-color);">配方分值: <b style="color:var(--brand-warning);font-size:14px;">{{ scoreRange.min }} ~ {{ scoreRange.max }}</b></div>
         <table style="font-size:13px;color:#ccc;border-collapse:collapse;line-height:1.4;border:1px solid #555;">
         <tr style="color:var(--brand-warning);">
           <td style="padding:1px 6px;border:1px solid #555;">总分</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">≤8</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">9~14</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">15~18</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">19~22</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">23~26</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">27~34</td><td style="border:1px solid #555;text-align:center;padding:1px 4px;">≥35</td>
@@ -132,16 +132,10 @@
                   :title="recipe_name[item.id]"
                 ></div>
                 <div style="font-size:13px;color:var(--brand-warning);">分值:{{ materialScore[item.id] }}</div>
-                <div>
-                  <select
-                    class="form-control"
-                    v-model="item.count"
-                    
-                  >
-                    <template v-for="i in 9" :key="i - 1">
-                      <option>{{ i - 1 }}</option>
-                    </template>
-                  </select>
+                <div style="display:flex;align-items:center;justify-content:center;gap:3px;margin-top:2px;">
+                  <button @click="item.count = Math.max(0, item.count - 1)" style="width:22px;height:22px;padding:0;line-height:1;font-size:14px;background:#555;color:#fff;border:1px solid #777;border-radius:3px;cursor:pointer;flex-shrink:0;">-</button>
+                  <span style="min-width:18px;text-align:center;font-weight:bold;font-size:14px;color:#fff;">{{ item.count }}</span>
+                  <button @click="item.count = Math.min(8, item.count + 1)" style="width:22px;height:22px;padding:0;line-height:1;font-size:14px;background:#555;color:#fff;border:1px solid #777;border-radius:3px;cursor:pointer;flex-shrink:0;">+</button>
                 </div>
               </div>
             </div>
