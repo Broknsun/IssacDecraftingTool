@@ -21,7 +21,6 @@
     "es3ify": "^0.2.2",
     "es3ify-mw": "^0.2.4",
     "esprima": "^4.0.1",
-    "node": "^17.3.0",
     "vue": "^3.0.0"
   },
   "devDependencies": {
