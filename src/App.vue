@@ -119,7 +119,7 @@
                 style="
                   width: fit-content;
                   text-align: center;
-                  margin: 2px;
+                  margin: 5px;
                   padding: 12px 8px;
                   background: var(--sub-a);
                   border-radius: 6px;
@@ -220,7 +220,7 @@
               style="
                 display: inline-block;
                 width: fit-content;
-                margin: 2px;
+                margin: 5px;
                 text-align: center;
                 background: var(--detail-bg);
                 border: solid;
@@ -317,7 +317,7 @@
                   style="
                     display: inline-block;
                     width: fit-content;
-                    margin: 2px;
+                    margin: 5px;
                     text-align: center;
                     background: var(--detail-bg);
                     border: solid;
